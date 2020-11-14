@@ -65,7 +65,7 @@ def change_rate(filename, ratio):
     """
     ratio_orig, audio = siw.read(filename)
     new_ratio = ratio_orig * ratio
-    siw.write("change_rate.wav", new_ratio, audio)
+    siw.write("change_rate.wav", round(new_ratio), audio)
 
 
 def change_samples(filename, ratio):
@@ -99,8 +99,8 @@ def resize(data, ratio):
     return new_data
 
 
-change_rate("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav", 2)
-change_samples("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav", 2)
+change_rate("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav", 1.25)
+change_samples("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav", 1.25)
 
 
 
