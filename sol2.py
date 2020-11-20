@@ -7,6 +7,8 @@
 import numpy as np
 import scipy.io.wavfile as siw
 
+CHANGE_RATE_FILE = "change_rate.wav"
+CHANGE_SAMPLE_FILE = "change_samples.wav"
 
 
 def DFT(signal):
@@ -16,6 +18,8 @@ def DFT(signal):
     :return: complex128 shape (N,)
     """
     N = signal.shape[0]
+    if N == 0:
+        return signal
     w = np.exp(-2 * np.pi * 1J / N)
     i, j = np.meshgrid(np.arange(N), np.arange(N))
     fourier_matrix = np.power(w, i * j)
@@ -30,6 +34,8 @@ def IDFT(fourier_signal):
     :return: 1d Numpy array complex128 shape (N,).
     """
     N = fourier_signal.shape[0]
+    if N == 0:
+        return fourier_signal
     w = np.exp(2 * np.pi * 1J / N)
     i, j = np.meshgrid(np.arange(N), np.arange(N))
     inverse_fourier_matrix = np.power(w, i * j)
@@ -44,7 +50,7 @@ def DFT2(image):
     :param image:2d Numpy array dtype float 64 shape (N,M).
     :return: 2d Numpy array complex128 shape (N,M)
     """
-    return np.apply_along_axis(DFT, 0, np.apply_along_axis(DFT, 1, image))
+    return (DFT(DFT(image).T)).T
 
 
 def IDFT2(fourier_image):
@@ -53,9 +59,7 @@ def IDFT2(fourier_image):
     :param fourier_image:  2d Numpy array complex128 shape (N,M)
     :return:  2d Numpy array complex128 shape (N,M)
     """
-    return np.apply_along_axis(IDFT, 0, np.apply_along_axis(IDFT, 1,
-                                                            fourier_image))
-
+    return (IDFT(IDFT(fourier_image).T)).T
 
 def change_rate(filename, ratio):
     """
@@ -65,7 +69,7 @@ def change_rate(filename, ratio):
     """
     ratio_orig, audio = siw.read(filename)
     new_ratio = ratio_orig * ratio
-    siw.write("change_rate.wav", round(new_ratio), audio)
+    siw.write(CHANGE_RATE_FILE, round(new_ratio), audio)
 
 
 def change_samples(filename, ratio):
@@ -76,7 +80,7 @@ def change_samples(filename, ratio):
     :return: 1D ndarray of dtype float64
     """
     ratio_orig, audio = siw.read(filename)
-    siw.write("change_samples.wav", ratio_orig * ratio, resize(audio, ratio))
+    siw.write(CHANGE_SAMPLE_FILE, ratio_orig * ratio, resize(audio, ratio))
 
 
 def resize(data, ratio):
