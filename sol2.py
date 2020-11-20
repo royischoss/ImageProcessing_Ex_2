@@ -5,6 +5,7 @@
 # transform. and editing their grayscale deviation for different needs.
 ##############################################################################
 import numpy as np
+import scipy.signal as ss
 import scipy.io.wavfile as siw
 
 CHANGE_RATE_FILE = "change_rate.wav"
@@ -20,10 +21,10 @@ def DFT(signal):
     N = signal.shape[0]
     if N == 0:
         return signal
-    w = np.exp(-2 * np.pi * 1J / N)
+
     i, j = np.meshgrid(np.arange(N), np.arange(N))
-    fourier_matrix = np.power(w, i * j)
-    fourier_signal = (np.dot(fourier_matrix, signal)).astype(np.complex128)
+    fourier_matrix = np.exp((-2 * np.pi * 1J * i * j) / N)
+    fourier_signal = np.dot(fourier_matrix, signal)
     return fourier_signal
 
 
@@ -36,12 +37,12 @@ def IDFT(fourier_signal):
     N = fourier_signal.shape[0]
     if N == 0:
         return fourier_signal
-    w = np.exp(2 * np.pi * 1J / N)
+
     i, j = np.meshgrid(np.arange(N), np.arange(N))
-    inverse_fourier_matrix = np.power(w, i * j)
-    fourier_signal = (np.dot(inverse_fourier_matrix,
-                             fourier_signal) * (1 / N)).astype(np.complex128)
-    return np.real(fourier_signal)
+    inverse_fourier_matrix = np.exp((2.0 * np.pi * 1J * i * j) / N)
+    # inverse_fourier_matrix = np.real_if_close(np.power(w, i * j))
+    signal = 1 / N * (np.dot(inverse_fourier_matrix, fourier_signal))
+    return np.real_if_close(signal)
 
 
 def DFT2(image):
@@ -61,6 +62,7 @@ def IDFT2(fourier_image):
     """
     return (IDFT(IDFT(fourier_image).T)).T
 
+
 def change_rate(filename, ratio):
     """
     Change the duration of an audio by changing rate of sampling.
@@ -69,18 +71,19 @@ def change_rate(filename, ratio):
     """
     ratio_orig, audio = siw.read(filename)
     new_ratio = ratio_orig * ratio
-    siw.write(CHANGE_RATE_FILE, round(new_ratio), audio)
+    siw.write(CHANGE_RATE_FILE, int(round(new_ratio)), audio)
 
 
 def change_samples(filename, ratio):
     """
-    Change the speed of an audio by changing the sampling amount using fourier.
+    Change the speed of an audio by changing the sampling ratio using fourier.
     :param filename: path for wav file.
     :param ratio: positive float64 represent sampled change.
     :return: 1D ndarray of dtype float64
     """
     ratio_orig, audio = siw.read(filename)
-    siw.write(CHANGE_SAMPLE_FILE, ratio_orig * ratio, resize(audio, ratio))
+    siw.write(CHANGE_SAMPLE_FILE, int(round(ratio_orig * ratio)),
+              resize(audio, ratio).astype(np.float64))
 
 
 def resize(data, ratio):
@@ -94,18 +97,104 @@ def resize(data, ratio):
     f_w = np.fft.fftshift(f_w)
     N = f_w.shape[0]
     new_samples = N // ratio
-    if ratio > 1:
-        new_f_w = f_w[int(round(-new_samples / 2)): int(round(new_samples / 2))]
+    samples_change = int(abs(N - new_samples))
+    start = samples_change // 2
+    end = N - start
+    if ratio >= 1:
+        new_f_w = f_w[start:end]
     else:
-        new_f_w = np.zeros(new_samples)
-        new_f_w[round(-N / 2): round(N / 2)] = f_w[round(-N / 2): round(N / 2)]
+        new_f_w = np.zeros(int(new_samples))
+        end = int(new_samples - start)
+        new_f_w[start:end] = f_w
     new_data = IDFT(np.fft.ifftshift(new_f_w))
     return new_data
 
 
-change_rate("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav", 1.25)
-change_samples("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav", 1.25)
+def resize_spectogram(data, ratio):
+    """
+
+    :param data:
+    :param ratio:
+    :return:
+    """
+    spectrogram = stft(data)
 
 
 
+# change_rate(
+#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+#     1.25)
+# change_samples(
+#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+#     1.25)
 
+DFT(np.array([1,1,1]))
+
+
+import numpy as np
+from scipy import signal
+from scipy.ndimage.interpolation import map_coordinates
+
+
+def stft(y, win_length=640, hop_length=160):
+    fft_window = signal.windows.hann(win_length, False)
+
+    # Window the time series.
+    n_frames = 1 + (len(y) - win_length) // hop_length
+    frames = [y[s:s + win_length] for s in np.arange(n_frames) * hop_length]
+
+    stft_matrix = np.fft.fft(fft_window * frames, axis=1)
+    return stft_matrix.T
+
+
+def istft(stft_matrix, win_length=640, hop_length=160):
+    n_frames = stft_matrix.shape[1]
+    y_rec = np.zeros(win_length + hop_length * (n_frames - 1), dtype=np.float)
+    ifft_window_sum = np.zeros_like(y_rec)
+
+    ifft_window = signal.windows.hann(win_length, False)[:, np.newaxis]
+    win_sq = ifft_window.squeeze() ** 2
+
+    # invert the block and apply the window function
+    ytmp = ifft_window * np.fft.ifft(stft_matrix, axis=0).real
+
+    for frame in range(n_frames):
+        frame_start = frame * hop_length
+        frame_end = frame_start + win_length
+        y_rec[frame_start: frame_end] += ytmp[:, frame]
+        ifft_window_sum[frame_start: frame_end] += win_sq
+
+    # Normalize by sum of squared window
+    y_rec[ifft_window_sum > 0] /= ifft_window_sum[ifft_window_sum > 0]
+    return y_rec
+
+
+def phase_vocoder(spec, ratio):
+    time_steps = np.arange(spec.shape[1]) * ratio
+    time_steps = time_steps[time_steps < spec.shape[1]]
+
+    # interpolate magnitude
+    yy = np.meshgrid(np.arange(time_steps.size), np.arange(spec.shape[0]))[1]
+    xx = np.zeros_like(yy)
+    coordiantes = [yy, time_steps + xx]
+    warped_spec = map_coordinates(np.abs(spec), coordiantes, mode='reflect', order=1).astype(np.complex)
+
+    # phase vocoder
+    # Phase accumulator; initialize to the first sample
+    spec_angle = np.pad(np.angle(spec), [(0, 0), (0, 1)], mode='constant')
+    phase_acc = spec_angle[:, 0]
+
+    for (t, step) in enumerate(np.floor(time_steps).astype(np.int)):
+        # Store to output array
+        warped_spec[:, t] *= np.exp(1j * phase_acc)
+
+        # Compute phase advance
+        dphase = (spec_angle[:, step + 1] - spec_angle[:, step])
+
+        # Wrap to -pi:pi range
+        dphase = np.mod(dphase - np.pi, 2 * np.pi) - np.pi
+
+        # Accumulate phase
+        phase_acc += dphase
+
+    return warped_spec
