@@ -139,6 +139,18 @@ def resize_vocoder(data, ratio):
     return istft(phase_correct_spectogram)
 
 
+def conv_der(im):
+    """
+
+    :param im:
+    :return:
+    """
+    line_vector_conv = np.array([0.5, 0, -0.5]).transpose()
+    column_vector_conv = np.array([0.5, 0, -0.5])
+    return np.sqrt(np.abs(signal.convolve2d(im, line_vector_conv)) ** 2 +
+                   np.abs(signal.convolve2d(im, column_vector_conv)) ** 2)
+
+
 
 
 
@@ -151,8 +163,6 @@ change_samples(
     2)
 
 
-
-import numpy as np
 from scipy import signal
 from scipy.ndimage.interpolation import map_coordinates
 
