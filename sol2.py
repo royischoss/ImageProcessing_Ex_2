@@ -100,9 +100,7 @@ def resize(data, ratio):
     new_samples = N // ratio
     samples_change = int(abs(N - new_samples))
     start = samples_change // 2
-    end = N - start
-    if start == 0:
-        end = N - 1
+    end = N - (samples_change - start)
     if samples_change == N and ratio > 1:
         return np.empty(shape=(0,))
     elif ratio > 1:
@@ -117,7 +115,7 @@ def resize(data, ratio):
     return new_data
 
 
-def resize_spectogram(data, ratio):
+def resize_spectrogram(data, ratio):
     """
 
     :param data:
@@ -125,6 +123,23 @@ def resize_spectogram(data, ratio):
     :return:
     """
     spectrogram = stft(data)
+    new_spectrogram = np.apply_along_axis(resize, 1, spectrogram, ratio)
+    return istft(new_spectrogram)
+
+
+def resize_vocoder(data, ratio):
+    """
+
+    :param data:
+    :param ratio:
+    :return:
+    """
+    resized_data = resize_spectrogram(data, ratio)
+    phase_correct_spectogram = phase_vocoder(stft(resized_data), ratio)
+    return istft(phase_correct_spectogram)
+
+
+
 
 
 
