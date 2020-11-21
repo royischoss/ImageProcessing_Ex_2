@@ -40,7 +40,6 @@ def IDFT(fourier_signal):
 
     i, j = np.meshgrid(np.arange(N), np.arange(N))
     inverse_fourier_matrix = np.exp((2.0 * np.pi * 1J * i * j) / N)
-    # inverse_fourier_matrix = np.real_if_close(np.power(w, i * j))
     signal = 1 / N * (np.dot(inverse_fourier_matrix, fourier_signal))
     return np.real_if_close(signal)
 
@@ -82,8 +81,10 @@ def change_samples(filename, ratio):
     :return: 1D ndarray of dtype float64
     """
     ratio_orig, audio = siw.read(filename)
-    siw.write(CHANGE_SAMPLE_FILE, int(round(ratio_orig * ratio)),
-              resize(audio, ratio).astype(np.float64))
+    data_after_resize = resize(audio, ratio).astype(np.float64)
+    siw.write(CHANGE_SAMPLE_FILE, int(ratio_orig),
+              data_after_resize.astype(np.int16))
+    return data_after_resize
 
 
 def resize(data, ratio):
@@ -100,12 +101,18 @@ def resize(data, ratio):
     samples_change = int(abs(N - new_samples))
     start = samples_change // 2
     end = N - start
-    if ratio >= 1:
+    if start == 0:
+        end = N - 1
+    if samples_change == N and ratio > 1:
+        return np.empty(shape=(0,))
+    elif ratio > 1:
         new_f_w = f_w[start:end]
-    else:
-        new_f_w = np.zeros(int(new_samples))
-        end = int(new_samples - start)
+    elif ratio < 1:
+        new_f_w = np.zeros(int(new_samples)).astype(np.complex128)
+        end = int(N + start)
         new_f_w[start:end] = f_w
+    else:
+        new_f_w = f_w
     new_data = IDFT(np.fft.ifftshift(new_f_w))
     return new_data
 
@@ -121,14 +128,13 @@ def resize_spectogram(data, ratio):
 
 
 
-# change_rate(
-#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-#     1.25)
-# change_samples(
-#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-#     1.25)
+change_rate(
+    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+    2)
+change_samples(
+    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+    2)
 
-DFT(np.array([1,1,1]))
 
 
 import numpy as np
