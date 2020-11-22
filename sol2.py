@@ -5,8 +5,10 @@
 # transform. and editing their grayscale deviation for different needs.
 ##############################################################################
 import numpy as np
-import scipy.signal as ss
 import scipy.io.wavfile as siw
+from scipy import signal
+from scipy.ndimage.interpolation import map_coordinates
+
 
 CHANGE_RATE_FILE = "change_rate.wav"
 CHANGE_SAMPLE_FILE = "change_samples.wav"
@@ -134,9 +136,9 @@ def resize_vocoder(data, ratio):
     :param ratio:
     :return:
     """
-    resized_data = resize_spectrogram(data, ratio)
-    phase_correct_spectogram = phase_vocoder(stft(resized_data), ratio)
-    return istft(phase_correct_spectogram)
+    stft_data = stft(data)
+    phase_correct_spectrogram = phase_vocoder(stft_data, ratio)
+    return istft(phase_correct_spectrogram)
 
 
 def conv_der(im):
@@ -151,20 +153,37 @@ def conv_der(im):
                    np.abs(signal.convolve2d(im, column_vector_conv)) ** 2)
 
 
+def fourier_der(im):
+    """
+
+    :param im:
+    :return:
+    """
+    number_of_lines = im.shape[0]
+    number_of_columns = im.shape[1]
+    u_frequencies_vector = np.arange(-number_of_columns // 2,
+                                     number_of_columns // 2, dtype=np.float64)
+    v_frequencies_vector = np.arange(-number_of_lines // 2,
+                                     number_of_lines // 2, dtype=np.float64)
+    derivative_x_image = \
+        (2 * np.pi / number_of_columns) * IDFT2(
+            (DFT2(im).np.fft.fftshift * u_frequencies_vector).np.fft.ifftshift)
+    derivative_y_image = \
+        (2 * np.pi / number_of_lines) * IDFT2(
+            (DFT2(im).np.fft.fftshift * v_frequencies_vector).np.fft.ifftshift)
+    derivative_image = np.sqrt(np.abs(derivative_x_image) ** 2 +
+                               np.abs(derivative_y_image) ** 2)
+    return derivative_image
 
 
+# change_rate(
+#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+#     2)
+# change_samples(
+#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+#     2)
 
 
-change_rate(
-    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-    2)
-change_samples(
-    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-    2)
-
-
-from scipy import signal
-from scipy.ndimage.interpolation import map_coordinates
 
 
 def stft(y, win_length=640, hop_length=160):
@@ -208,7 +227,8 @@ def phase_vocoder(spec, ratio):
     yy = np.meshgrid(np.arange(time_steps.size), np.arange(spec.shape[0]))[1]
     xx = np.zeros_like(yy)
     coordiantes = [yy, time_steps + xx]
-    warped_spec = map_coordinates(np.abs(spec), coordiantes, mode='reflect', order=1).astype(np.complex)
+    warped_spec = map_coordinates(np.abs(spec), coordiantes, mode='reflect',
+                                  order=1).astype(np.complex)
 
     # phase vocoder
     # Phase accumulator; initialize to the first sample
@@ -229,3 +249,8 @@ def phase_vocoder(spec, ratio):
         phase_acc += dphase
 
     return warped_spec
+
+
+ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
+siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
+siw.write("samplesp.wav", ratio_orig, resize_spectrogram(audio,2).astype(np.int16))
