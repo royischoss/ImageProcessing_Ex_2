@@ -13,9 +13,8 @@ from skimage.color import rgb2gray
 
 MAX_SEGMENT = 255
 
-
-
 CHANGE_RATE_FILE = "change_rate.wav"
+
 CHANGE_SAMPLE_FILE = "change_samples.wav"
 
 
@@ -156,8 +155,12 @@ def conv_der(im):
     :param im: matrix represent gray scale of a photo.
     :return: matrix represent magnitude of a derivative photo.
     """
-    line_vector_conv = np.array([0.5, 0, -0.5]).transpose()
-    column_vector_conv = np.array([0.5, 0, -0.5])
+    line_vector_conv = np.array([[0, 0, 0],
+                                 [0.5, 0, -0.5],
+                                 [0, 0, 0]]).transpose()
+    column_vector_conv = np.array([[0, 0, 0],
+                                   [0.5, 0, -0.5],
+                                   [0, 0, 0]])
     return np.sqrt(np.abs(signal.convolve2d(im, line_vector_conv)) ** 2 +
                    np.abs(signal.convolve2d(im, column_vector_conv)) ** 2)
 
@@ -191,9 +194,6 @@ def fourier_der(im):
 # change_samples(
 #     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
 #     2)
-
-
-
 
 
 def stft(y, win_length=640, hop_length=160):
@@ -280,4 +280,3 @@ def read_image(filename, representation):
 # ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
 # siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
 # siw.write("samplesp.wav", ratio_orig, resize_spectrogram(audio,2).astype(np.int16))
-
