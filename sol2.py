@@ -155,10 +155,10 @@ def conv_der(im):
     :param im: matrix represent gray scale of a photo.
     :return: matrix represent magnitude of a derivative photo.
     """
-    line_vector_conv = np.array([[0.5, 0, -0.5]]).transpose()
-    column_vector_conv = np.array([[0.5, 0, -0.5]])
-    return np.sqrt(np.abs(signal.convolve2d(im, line_vector_conv)) ** 2 +
-                   np.abs(signal.convolve2d(im, column_vector_conv)) ** 2)
+    line_vector_conv = np.array([[0.5, 0, -0.5]])
+    column_vector_conv = np.array([[0.5, 0, -0.5]]).transpose()
+    return np.sqrt(np.abs(signal.convolve2d(im, line_vector_conv, mode='same')) ** 2 +
+                   np.abs(signal.convolve2d(im, column_vector_conv, mode='same')) ** 2)
 
 
 def fourier_der(im):
@@ -271,7 +271,7 @@ def read_image(filename, representation):
     else:
         image_mat = np.array(image.astype(np.float64))
         image_mat /= MAX_SEGMENT
-    return image_mat
+    return image_mat.astype(np.float64)
 
 # ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
 # siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
