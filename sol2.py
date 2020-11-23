@@ -178,7 +178,7 @@ def fourier_der(im):
             (np.fft.fftshift(DFT2(im)) * u_frequencies_vector))
     derivative_y_image = \
         (2 * np.pi / number_of_lines) * IDFT2(
-            (np.fft.fftshift(DFT2(im)) * v_frequencies_vector.transpose()))
+            (np.fft.fftshift(DFT2(im)).T * v_frequencies_vector)).T
     derivative_image = np.sqrt(np.abs(derivative_x_image) ** 2 +
                                np.abs(derivative_y_image) ** 2)
     return derivative_image
