@@ -176,12 +176,13 @@ def fourier_der(im):
     return derivative_image
 
 
-# change_rate(
-#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-#     2)
-# change_samples(
-#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-#     2)
+change_rate(
+    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+    2)
+change_samples(
+    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+    2)
+
 
 
 
@@ -251,6 +252,8 @@ def phase_vocoder(spec, ratio):
     return warped_spec
 
 
-ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
-siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
-siw.write("samplesp.wav", ratio_orig, resize_spectrogram(audio,2).astype(np.int16))
+
+# ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
+# siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
+# siw.write("samplesp.wav", ratio_orig, resize_spectrogram(audio,2).astype(np.int16))
+

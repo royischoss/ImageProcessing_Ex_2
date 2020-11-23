@@ -1,0 +1,9 @@
+Question2 -
+The diffrence between resize_spectrogram wav to resize_vocoder was 
+that in resize_spectrogram we have holes meaning we don't the sound
+as we expected or there is no sound at all.
+in resize_vocoder wav we hear the sounds fully but faster without high pitch.
+the reason of the diffrence is the phase of the reconstructed spectogram. we 
+didn't change phase in resize_spectrogram so we loose information when the waves
+are creating interference. and in resize_vocoder we do get the phase right and 
+avoid it.

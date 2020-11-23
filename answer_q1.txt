@@ -1,0 +1,9 @@
+Question1 - 
+The diffrence between the two samples was that change_rate.wav
+was high toned but coverage all data, while change_samples.wav
+was by tone closer to the original but we lost some of the tones.
+The reason for the diffrence is the procces we made on each data.
+on change_rate we only said we sampled faster so it playing our
+samples faster. while on change_samples we clipped the high frequencies
+and shorted the data so we lost some tones but the one we heard were as 
+in the original sound.
