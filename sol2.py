@@ -8,6 +8,11 @@ import numpy as np
 import scipy.io.wavfile as siw
 from scipy import signal
 from scipy.ndimage.interpolation import map_coordinates
+from imageio import imread
+from skimage.color import rgb2gray
+
+MAX_SEGMENT = 255
+
 
 
 CHANGE_RATE_FILE = "change_rate.wav"
@@ -256,6 +261,21 @@ def phase_vocoder(spec, ratio):
     return warped_spec
 
 
+def read_image(filename, representation):
+    """
+    The next lines preform a image read to a matrix of numpy.float64 using
+    imagio and numpy libraries.
+    :param filename: a path to jpg image we would like to read.
+    :param representation: 1 stands for grayscale , 2 for RGB.
+    :return: image_mat - a numpy array represents the photo as described above.
+    """
+    image = imread(filename)
+    if representation == 1:
+        image_mat = np.array(rgb2gray(image))
+    else:
+        image_mat = np.array(image.astype(np.float64))
+        image_mat /= MAX_SEGMENT
+    return image_mat
 
 # ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
 # siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
