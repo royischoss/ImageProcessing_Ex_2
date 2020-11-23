@@ -17,6 +17,8 @@ CHANGE_RATE_FILE = "change_rate.wav"
 
 CHANGE_SAMPLE_FILE = "change_samples.wav"
 
+CONV_VEC = [0.5, 0, -0.5]
+
 
 def DFT(signal):
     """
@@ -155,8 +157,8 @@ def conv_der(im):
     :param im: matrix represent gray scale of a photo.
     :return: matrix represent magnitude of a derivative photo.
     """
-    line_vector_conv = np.array([[0.5, 0, -0.5]])
-    column_vector_conv = np.array([[0.5, 0, -0.5]]).transpose()
+    line_vector_conv = np.array([CONV_VEC])
+    column_vector_conv = np.array([CONV_VEC]).transpose()
     return np.sqrt(np.abs(signal.convolve2d(im, line_vector_conv, mode='same')) ** 2 +
                    np.abs(signal.convolve2d(im, column_vector_conv, mode='same')) ** 2)
 
@@ -184,14 +186,7 @@ def fourier_der(im):
     return derivative_image
 
 
-# change_rate(
-#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-#     2)
-# change_samples(
-#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-#     2)
-
-
+# ex2_helper:
 def stft(y, win_length=640, hop_length=160):
     fft_window = signal.windows.hann(win_length, False)
 
@@ -256,7 +251,7 @@ def phase_vocoder(spec, ratio):
 
     return warped_spec
 
-
+# from ex1 read image:
 def read_image(filename, representation):
     """
     The next lines preform a image read to a matrix of numpy.float64 using
@@ -273,6 +268,4 @@ def read_image(filename, representation):
         image_mat /= MAX_SEGMENT
     return image_mat.astype(np.float64)
 
-# ratio_orig, audio = siw.read("C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/beautiful_Voice.wav")
-# siw.write("samplevoco.wav", ratio_orig, resize_vocoder(audio,2).astype(np.int16))
-# siw.write("samplesp.wav", ratio_orig, resize_spectrogram(audio,2).astype(np.int16))
+
