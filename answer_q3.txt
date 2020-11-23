@@ -1,0 +1,5 @@
+Question 3 - 
+We got two diffrent magnitude matrix because convolution is a approximation of the derivative.
+while using fourie we are using the derivative formula and getting an more acurate analysis.
+notice that because we are in the [n] domain of time we can have some wrong analysis here too
+cause we can't define every real value point in the matrix.

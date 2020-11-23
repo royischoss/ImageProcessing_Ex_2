@@ -119,10 +119,10 @@ def resize(data, ratio):
 
 def resize_spectrogram(data, ratio):
     """
-
-    :param data:
-    :param ratio:
-    :return:
+    This function speed up/slow down a wav file, without changing the pitch.
+    :param data: a sample of the wav file dtype float64
+    :param ratio: the ratio we want our audio to be changed by.
+    :return: the data after speeding/slowing.
     """
     spectrogram = stft(data)
     new_spectrogram = np.apply_along_axis(resize, 1, spectrogram, ratio)
@@ -131,7 +131,11 @@ def resize_spectrogram(data, ratio):
 
 def resize_vocoder(data, ratio):
     """
-
+    This function speed up/slow down a wav file, without changing the pitch.
+    while re-arrange the phase.
+    :param data: a sample of the wav file dtype float64
+    :param ratio: the ratio we want our audio to be changed by.
+    :return: the data after speeding/slowing.
     :param data:
     :param ratio:
     :return:
@@ -143,9 +147,9 @@ def resize_vocoder(data, ratio):
 
 def conv_der(im):
     """
-
-    :param im:
-    :return:
+    This function calculate derivative of a photo using convolution.
+    :param im: matrix represent gray scale of a photo.
+    :return: matrix represent magnitude of a derivative photo.
     """
     line_vector_conv = np.array([0.5, 0, -0.5]).transpose()
     column_vector_conv = np.array([0.5, 0, -0.5])
@@ -155,9 +159,9 @@ def conv_der(im):
 
 def fourier_der(im):
     """
-
-    :param im:
-    :return:
+    This function calculate derivative of a photo using fourier.
+    :param im: matrix represent gray scale of a photo.
+    :return: matrix represent magnitude of a derivative photo.
     """
     number_of_lines = im.shape[0]
     number_of_columns = im.shape[1]
@@ -176,12 +180,12 @@ def fourier_der(im):
     return derivative_image
 
 
-change_rate(
-    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-    2)
-change_samples(
-    "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
-    2)
+# change_rate(
+#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+#     2)
+# change_samples(
+#     "C:/Users/Roy\PycharmProjects/ex2-royschossberge/external/aria_4kHz.wav",
+#     2)
 
 
 
