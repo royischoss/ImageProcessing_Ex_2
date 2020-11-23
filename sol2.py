@@ -155,12 +155,8 @@ def conv_der(im):
     :param im: matrix represent gray scale of a photo.
     :return: matrix represent magnitude of a derivative photo.
     """
-    line_vector_conv = np.array([[0, 0, 0],
-                                 [0.5, 0, -0.5],
-                                 [0, 0, 0]]).transpose()
-    column_vector_conv = np.array([[0, 0, 0],
-                                   [0.5, 0, -0.5],
-                                   [0, 0, 0]])
+    line_vector_conv = np.array([[0.5, 0, -0.5]]).transpose()
+    column_vector_conv = np.array([[0.5, 0, -0.5]])
     return np.sqrt(np.abs(signal.convolve2d(im, line_vector_conv)) ** 2 +
                    np.abs(signal.convolve2d(im, column_vector_conv)) ** 2)
 
