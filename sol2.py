@@ -171,22 +171,26 @@ def fourier_der(im):
     """
     number_of_lines = im.shape[0]
     number_of_columns = im.shape[1]
-    u_frequencies_vector = np.arange(-number_of_columns // 2,
-                                     number_of_columns // 2, dtype=np.float64)
-    v_frequencies_vector = np.arange(-number_of_lines // 2,
-                                     number_of_lines // 2, dtype=np.float64)
-    derivative_x_image = \
-        (2 * np.pi / number_of_columns) * IDFT2(
-            (np.fft.fftshift(DFT2(im)) * u_frequencies_vector))
-    derivative_y_image = \
-        (2 * np.pi / number_of_lines) * IDFT2(
-            (np.fft.fftshift(DFT2(im)).T * v_frequencies_vector)).T
+    u_bounds = (-int(number_of_columns / 2), number_of_columns -
+                int(number_of_columns / 2))
+    v_bounds = (-int(number_of_lines / 2), number_of_lines -
+                int(number_of_lines / 2))
+
+    u_frequencies_vector = np.arange(u_bounds[0], u_bounds[1])
+    v_frequencies_vector = np.arange(v_bounds[0], v_bounds[1])
+
+    derivative_x_image = ((2 * np.pi * 1j) / number_of_columns) * \
+                         IDFT2((np.fft.fftshift(DFT2(im)) * u_frequencies_vector))
+    derivative_y_image = ((2 * np.pi * 1j) / number_of_lines) * \
+                         IDFT2((np.fft.fftshift(DFT2(im)).T * v_frequencies_vector).T)
+
     derivative_image = np.sqrt(np.abs(derivative_x_image) ** 2 +
                                np.abs(derivative_y_image) ** 2)
     return derivative_image
 
 
 # ex2_helper:
+
 def stft(y, win_length=640, hop_length=160):
     fft_window = signal.windows.hann(win_length, False)
 
@@ -221,15 +225,14 @@ def istft(stft_matrix, win_length=640, hop_length=160):
 
 
 def phase_vocoder(spec, ratio):
-    time_steps = np.arange(spec.shape[1]) * ratio
-    time_steps = time_steps[time_steps < spec.shape[1]]
+    num_timesteps = int(spec.shape[1] / ratio)
+    time_steps = np.arange(num_timesteps) * ratio
 
     # interpolate magnitude
     yy = np.meshgrid(np.arange(time_steps.size), np.arange(spec.shape[0]))[1]
     xx = np.zeros_like(yy)
     coordiantes = [yy, time_steps + xx]
-    warped_spec = map_coordinates(np.abs(spec), coordiantes, mode='reflect',
-                                  order=1).astype(np.complex)
+    warped_spec = map_coordinates(np.abs(spec), coordiantes, mode='reflect', order=1).astype(np.complex)
 
     # phase vocoder
     # Phase accumulator; initialize to the first sample
@@ -251,6 +254,7 @@ def phase_vocoder(spec, ratio):
 
     return warped_spec
 
+
 # from ex1 read image:
 def read_image(filename, representation):
     """
@@ -267,5 +271,3 @@ def read_image(filename, representation):
         image_mat = np.array(image.astype(np.float64))
         image_mat /= MAX_SEGMENT
     return image_mat.astype(np.float64)
-
-
